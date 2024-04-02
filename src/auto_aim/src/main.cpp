@@ -54,18 +54,18 @@
 #include "auto_aim/Serial/Serial.h"
 #include "auto_aim/ArmorDetector/ArmorDetector.h"
 #include "auto_aim/Gui/Gui.h"
-#include "auto_aim/vision_rx_data.h"
-#include "auto_aim/vision_tx_data.h"
+#include "robot_driver/vision_rx_data.h"
+#include "robot_driver/vision_tx_data.h"
 
 ros::Publisher vision_pub;
 ros::Subscriber vision_sub;
-auto_aim::vision_tx_data pc_recv_mesg;
-auto_aim::vision_rx_data pc_send_mesg;
+robot_driver::vision_tx_data pc_recv_mesg;
+robot_driver::vision_rx_data pc_send_mesg;
 
 using namespace std;
 using namespace cv;
 
-void visionCallback(const auto_aim::vision_rx_data::ConstPtr &msg){
+void visionCallback(const robot_driver::vision_rx_data::ConstPtr &msg){
     pc_send_mesg.bullet_level = msg->bullet_level;
     pc_send_mesg.direction = msg->direction;
     pc_send_mesg.robot_color = msg->robot_color;
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     ros::init(argc,argv,"auto_aim");
     ros::NodeHandle nh;
     
-    vision_pub = nh.advertise<auto_aim::vision_tx_data>("vision_tx_data",1);
+    vision_pub = nh.advertise<robot_driver::vision_tx_data>("vision_tx_data",1);
     vision_sub = nh.subscribe("/vision_rx_data", 1, visionCallback);
 #ifdef USE_CUTECOM
     //-----------------------------------【串口助手】------------------------------------------
@@ -265,16 +265,17 @@ void mainProcessing(MainSettings *main_setting, PackData *pack_data, UnpackData 
 //        else if(unpack_data->getStm2PcMesg()->stm32_info_data.enemy_color == 2)
 //            main_setting->enemy_color = blue;
 
-        // if(pc_send_mesg.robot_color == 1)
-        //     main_setting->enemy_color = red;
-        // else if(pc_send_mesg.robot_color == 2)
-        //     main_setting->enemy_color = blue;
+        if(pc_send_mesg.robot_color == 0)
+            main_setting->enemy_color = red;
+        else if(pc_send_mesg.robot_color == 1)
+            main_setting->enemy_color = blue;
 
 ////         接收电控发送的模式切换(比赛前切记打开)
 //        if(!std::isnan(unpack_data->getStm2PcMesg()->stm32_info_data.main_mode))
 //            main_setting->main_mode = unpack_data->getStm2PcMesg()->stm32_info_data.main_mode;
 
-        // main_setting->main_mode = pc_send_mesg.task_mode;
+        if(!std::isnan(pc_send_mesg.task_mode))
+            main_setting->main_mode = pc_send_mesg.task_mode;
 
 //#ifdef DEBUG_MODE
 //        std::cout << "main_mode:          " << unpack_data->getStm2PcMesg()->stm32_info_data.main_mode << std::endl;
@@ -352,7 +353,7 @@ void mainProcessing(MainSettings *main_setting, PackData *pack_data, UnpackData 
         }
     }
 
-    serial->closeDevice();
+    // serial->closeDevice();
 
 #if (USE_VIDEO == 0)
     MVVideoCapture::Stop();

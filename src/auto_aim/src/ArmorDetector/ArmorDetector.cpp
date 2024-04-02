@@ -1,12 +1,12 @@
 ﻿#include "auto_aim/ArmorDetector/ArmorDetector.h"
 #include "ros/ros.h"
-#include "auto_aim/vision_rx_data.h"
-#include "auto_aim/vision_tx_data.h"
+#include "robot_driver/vision_rx_data.h"
+#include "robot_driver/vision_tx_data.h"
 
 extern ros::Publisher vision_pub;
-extern auto_aim::vision_tx_data pc_recv_mesg;
+extern robot_driver::vision_tx_data pc_recv_mesg;
 
-auto detector = PicoDet("/home/rm/awakelion_vision/src/auto_aim/pico64_2023_5.onnx");
+auto detector = PicoDet("/home/rm/git_repository/awakelion_vision/src/auto_aim/pico64_2023_5.onnx");
 
 ArmorDetector::ArmorDetector(ArmorSettings *armor_setting, MainSettings *main_setting, std::vector<cv::Point> armor_contours)
     :AdaptiveThreshold(armor_setting->preprocess_param), TargetDetection(armor_setting->tgt_size_param, main_setting->debug, armor_contours)
@@ -31,7 +31,7 @@ void ArmorDetector::armorDetecProc(cv::Mat src, AngleSolver &angle_slover,
     QuadrilateralPos armor_pos;  // 装甲板四个点坐标
     cv::RotatedRect rot_rect;    // 装甲板旋转矩形
 //    static double  pit_before=0,yaw_before=0;
-    static double pit_last = 0, yaw_last = 0;
+    static double pit_last, yaw_last;
     static int top = 0;
 //    static bool is_left;
 //    float num = 2.0;
@@ -103,9 +103,9 @@ void ArmorDetector::armorDetecProc(cv::Mat src, AngleSolver &angle_slover,
              * 13.1 4.95  22.7 5.4   1500         new
              *
                                                                 */
-            angle_slover.setTargetSize(13.1, 4.9);   //12.4 5.4||13.0 5.6(new)
+            angle_slover.setTargetSize(13.5, 6);   //12.4 5.4||13.0 5.6(new)
         else
-            angle_slover.setTargetSize(22.7, 5.4);   //21.6 5.4||22.7 5.4(new)
+            angle_slover.setTargetSize(23, 6);   //21.6 5.4||22.7 5.4(new)
 
         //进入角度解算
         angle_slover.getAngle(armor_rect, main_setting->camera_param.bullet_speed);
@@ -126,9 +126,9 @@ void ArmorDetector::armorDetecProc(cv::Mat src, AngleSolver &angle_slover,
             //pitch重力补偿
             if(/*!std::isnan(unpack_data->getStm2PcMesg()->stm32_info_data.bullet_spd) && unpack_data->getStm2PcMesg()->stm32_info_data.bullet_spd != 0*/ 0)//电控发送弹速不为0或异常值
             {
-                pit_final = -gc.solveAngleWithGravity(-angle_slover.getPitRef(), dist / 100, /*unpack_data->getStm2PcMesg()->stm32_info_data.bullet_spd*/ 12);
+                pit_final = -gc.solveAngleWithGravity(-angle_slover.getPitRef(), dist / 100, /*unpack_data->getStm2PcMesg()->stm32_info_data.bullet_spd*/ 25);
             }else{
-                pit_final = -gc.solveAngleWithGravity(-angle_slover.getPitRef(), dist / 100, 12);
+                pit_final = -gc.solveAngleWithGravity(-angle_slover.getPitRef(), dist / 100, 25);
             }
 
 #ifdef DEBUG_MODE
@@ -198,10 +198,17 @@ void ArmorDetector::armorDetecProc(cv::Mat src, AngleSolver &angle_slover,
 
         pc_recv_mesg.aim_pitch = pit_final;
         pc_recv_mesg.aim_yaw = yaw_final;
-        if((pit_final >= -5 && pit_final <= 5) && (yaw_final >= -5 && yaw_final <= 5))
-            pc_recv_mesg.visual_valid = 1;
+        pc_recv_mesg.visual_valid = 1;
+        if(imgPro.label == "G")
+            pc_recv_mesg.label = 7;
+        else if(imgPro.label == "")
+            pc_recv_mesg.label = 0;
         else
-            pc_recv_mesg.visual_valid = 0;
+            pc_recv_mesg.label = std::stoi(imgPro.label);
+        if((pit_final >= -10 && pit_final <= 10) && (yaw_final >= -10 && yaw_final <= 10))
+            pc_recv_mesg.shoot_valid = 1;
+        else
+            pc_recv_mesg.shoot_valid = 0;
     }
     else
     {
@@ -252,14 +259,17 @@ void ArmorDetector::armorDetecProc(cv::Mat src, AngleSolver &angle_slover,
         // pack_data->setPc2StmMesg()->gimbal_control_data.time = t1_param;    //时间戳     /*u32(time_y * 1000)*/ //每轮运行时间
         // pack_data->setPc2StmMesg()->gimbal_control_data.buff_shoot = 0;
 
-        pc_recv_mesg.aim_pitch = pit_last;
-        pc_recv_mesg.aim_yaw = yaw_last;
-        pit_final = 0;
-        yaw_final = 0;
+        pc_recv_mesg.aim_pitch = 0;
+        pc_recv_mesg.aim_yaw = 0;
+        // pit_final = 0;
+        // yaw_final = 0;
+        pc_recv_mesg.shoot_valid = 0;
+        pc_recv_mesg.label = 0;
+        // pc_recv_mesg.visual_valid = 0;
 
         /*
         //if(1)
-        if(lost_flag < 25)
+        if(lost_flag < 30)
             //pack_data->setPc2StmMesg()->gimbal_control_data.visual_valid = 1;
             pc_recv_mesg.visual_valid = 1;
         else
@@ -272,10 +282,25 @@ void ArmorDetector::armorDetecProc(cv::Mat src, AngleSolver &angle_slover,
 
         lost_flag++;
         */
+        //if(1)
+        if(lost_flag < 100)
+            //pack_data->setPc2StmMesg()->gimbal_control_data.visual_valid = 1;
+            pc_recv_mesg.visual_valid = 1;
+        else
+        {
+            //pack_data->setPc2StmMesg()->gimbal_control_data.visual_valid = 0;
+            pc_recv_mesg.visual_valid = 0;
+            pit_final = 0;
+            yaw_final = 0;
+        }
+
+        lost_flag++;
     }
 
     // 6.串口发送
     // pack_data->process(serial);
+    pit_last = pit_final;
+    yaw_last = yaw_final;
     vision_pub.publish(pc_recv_mesg);
 }
 
@@ -1082,7 +1107,7 @@ void GetNum::NNgetPredictResult(cv::Mat &image)
         }
     }
 
-    cv::threshold(classify_image,classify_bin_image,ave_pixel_value + 2,255,cv::THRESH_BINARY);    //二值化
+    cv::threshold(classify_image,classify_bin_image,ave_pixel_value, 255, cv::THRESH_BINARY);    //二值化
 
     cv::medianBlur(classify_bin_image,classify_bin_image,3);    //中值滤波
 

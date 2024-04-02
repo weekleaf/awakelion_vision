@@ -6,7 +6,7 @@
 
 #include "opencv2/opencv.hpp"
 
-#define USE_DIGIT_FIGURE    //是否使用数字识别
+// #define USE_DIGIT_FIGURE    //是否使用数字识别
 #define THRE_MODE        //二值方法选择 0正片 1通减
 #define DEBUG_MODE      // 模式选择0
 //#define USE_CUTECOM     // 是否使用串口助手
@@ -43,11 +43,11 @@
 
 #define ARMS 1          // 当前PC所属机器人编号
 #if (ARMS == 1)
-#define PARAM_OTHER_PATH "/home/rm/awakelion_vision/src/auto_aim/config_file/param_other.yml"  //全局配置文件路径
-#define PARAM_ARMOR_PATH "/home/rm/awakelion_vision/src/auto_aim/config_file/param_armor.yml"  //装甲板配置文件路径
-#define PARAM_CALIBRATION_752 "/home/rm/awakelion_vision/src/auto_aim/calibration/Camera752-infantry.xml"  //相机参数
-#define SAVE_VIDEO_DIR   "/home/rm/awakelion_vision/src/auto_aim/save_video/"
-#define SAVE_PIC_DIR   "/home/rm/awakelion_vision/src/auto_aim/save_pic/"
+#define PARAM_OTHER_PATH "/home/rm/git_repository/awakelion_vision/src/auto_aim/config_file/param_other.yml"  //全局配置文件路径
+#define PARAM_ARMOR_PATH "/home/rm/git_repository/awakelion_vision/src/auto_aim/config_file/param_armor.yml"  //装甲板配置文件路径
+#define PARAM_CALIBRATION_752 "/home/rm/git_repository/awakelion_vision/src/auto_aim/calibration/Camera752-infantry.xml"  //相机参数
+#define SAVE_VIDEO_DIR   "/home/rm/git_repository/awakelion_vision/src/auto_aim/save_video/"
+#define SAVE_PIC_DIR   "/home/rm/git_repository/awakelion_vision/src/auto_aim/save_pic/"
 
 #endif  // ARMS
 
