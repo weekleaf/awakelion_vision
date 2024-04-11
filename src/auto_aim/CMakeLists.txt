@@ -267,6 +267,7 @@ set(DISTFILES
 )
 
 add_executable(${PROJECT_NAME}_node ${SOURCES} ${HEADERS} ${DISTFILES})
+
   target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
   ${InferenceEngine_LIBRARIES}

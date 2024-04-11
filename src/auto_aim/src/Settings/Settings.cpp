@@ -432,7 +432,7 @@ void MainSettings::setCameraParam(const char *win_name)
     cv::namedWindow(win_name);
     static int x = (camera_param.x * 100.);
     cv::createTrackbar("cp-x", win_name, &x, 1000);
-    camera_param.x = -(x / 100.);//2024.3.31 为了适应哨兵
+    camera_param.x = -(x / 100.);//2024.3.31 加负号为了适应哨兵
 
     static int y = camera_param.y * 100.;
     cv::createTrackbar("cp-y", win_name, &y, 1000);

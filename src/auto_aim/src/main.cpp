@@ -210,7 +210,7 @@ void mainProcessing(MainSettings *main_setting, PackData *pack_data, UnpackData 
     //--------------------------------------【循环】--------------------------------------------
     // brief：
     //-----------------------------------------------------------------------------------------
-    while(1)
+    while(ros::ok())
     {   
         // 处理通信数据
         ros::spinOnce();
@@ -239,7 +239,7 @@ void mainProcessing(MainSettings *main_setting, PackData *pack_data, UnpackData 
         cv::resize(src,src,cv::Size(SHOW_WIDTH,SHOW_HEIGHT));
 #elif (USE_VIDEO == 1)
         cap >> src;
-        cv::resize(src, src, cv::Size(src.cols * 1, src.rows * 1));
+        cv::resize(src, src, cv::Size(/*src.cols * 1*/750, /*+src.rows * 1*/600));
 #endif  // USE_VIDEO
 
 

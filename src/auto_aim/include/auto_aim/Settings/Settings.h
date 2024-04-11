@@ -6,7 +6,7 @@
 
 #include "opencv2/opencv.hpp"
 
-// #define USE_DIGIT_FIGURE    //是否使用数字识别
+//#define USE_DIGIT_FIGURE    //是否使用数字识别
 #define THRE_MODE        //二值方法选择 0正片 1通减
 #define DEBUG_MODE      // 模式选择0
 //#define USE_CUTECOM     // 是否使用串口助手
@@ -26,7 +26,7 @@
 //-----------------------------------【宏定义-调试模块】--------------------------------------------
 // brief：主要用于定义一些窗口
 //-----------------------------------------------------------------------------------------------
-#define VIDEO_PATH "/home/rm/1.mp4"     //测试视频路径run_left
+#define VIDEO_PATH "/home/rm/git_repository/awakelion_vision/src/auto_aim/save_video/2.avi"     //测试视频路径run_left
 #define WIN_NAME_ARMORP_PREPROCESS "bin"                  // 灯条预处理窗口
 #define WIN_NAME_ARMORP_TARGET "灯条调试"                  // 灯条调试窗口
 #define WIN_NAME_ARMORP "小甲板调试"                       // 装甲板调试窗口

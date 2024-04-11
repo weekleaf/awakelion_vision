@@ -205,10 +205,11 @@ void ArmorDetector::armorDetecProc(cv::Mat src, AngleSolver &angle_slover,
             pc_recv_mesg.label = 0;
         else
             pc_recv_mesg.label = std::stoi(imgPro.label);
-        if((pit_final >= -10 && pit_final <= 10) && (yaw_final >= -10 && yaw_final <= 10))
-            pc_recv_mesg.shoot_valid = 1;
-        else
-            pc_recv_mesg.shoot_valid = 0;
+        // if((pit_final >= -10 && pit_final <= 10) && (yaw_final >= -10 && yaw_final <= 10))
+        //     pc_recv_mesg.shoot_valid = 1;
+        // else
+        //     pc_recv_mesg.shoot_valid = 0;
+        pc_recv_mesg.shoot_valid = 1;
     }
     else
     {
@@ -283,7 +284,7 @@ void ArmorDetector::armorDetecProc(cv::Mat src, AngleSolver &angle_slover,
         lost_flag++;
         */
         //if(1)
-        if(lost_flag < 100)
+        if(lost_flag < 50)
             //pack_data->setPc2StmMesg()->gimbal_control_data.visual_valid = 1;
             pc_recv_mesg.visual_valid = 1;
         else
@@ -1107,7 +1108,7 @@ void GetNum::NNgetPredictResult(cv::Mat &image)
         }
     }
 
-    cv::threshold(classify_image,classify_bin_image,ave_pixel_value, 255, cv::THRESH_BINARY);    //二值化
+    cv::threshold(classify_image,classify_bin_image,ave_pixel_value + 5, 255, cv::THRESH_BINARY);    //二值化
 
     cv::medianBlur(classify_bin_image,classify_bin_image,3);    //中值滤波
 
